@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kshitiz | Premium To-Do List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary: #6c47ff;
+            --secondary: #5a36e6;
+            --accent: #8d6aff;
+            --light: #e0f2fe;
+            --dark: #1e3a8a;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: var(--dark);
+        }
+
+        .task-item {
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .completed {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .floating-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .no-tasks {
+            height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes ksFloat {
+            0% { transform: translateY(0) rotate(-1deg); }
+            50% { transform: translateY(-7px) rotate(1deg); }
+            100% { transform: translateY(0) rotate(-1deg); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-bounce {
+            animation: bounce 1.5s infinite;
+        }
+        img {
+            transition: opacity 0.3s ease;
+        }
+        img:not([src]) {
+            opacity: 0;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+
+        /* New components */
+        .tab-btn {
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+        .note {
+            transition: transform 0.2s;
+            min-height: 150px;
+        }
+        .note:hover {
+            transform: translateY(-2px);
+        }
+        /* Priority indicators */
+        .priority-high {
+            border-left: 4px solid #ef4444;
+        }
+
+        .priority-medium {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .priority-low {
+            border-left: 4px solid #10b981;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-title {
+                font-size: 1.5rem;
+            }
+            
+            .floating-btn {
+                bottom: 1.5rem;
+                right: 1.5rem;
+                width: 3rem;
+                height: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-3xl">
+        <div class="flex justify-center mb-6">
+                <button id="tasks-tab" class="tab-btn active px-4 py-2 border-b-2 border-blue-500" onclick="switchTab('tasks')">Tasks</button>
+                <button id="reminders-tab" class="tab-btn px-4 py-2 text-gray-500" onclick="switchTab('reminders')">Reminders</button>
+                <button id="notes-tab" class="tab-btn px-4 py-2 text-gray-500" onclick="switchTab('notes')">Notes</button>
+                <button id="timer-tab" class="tab-btn px-4 py-2 text-gray-500" onclick="switchTab('timer')">Timer</button>
+            <button class="tab-btn active px-4 py-2 border-b-2 border-blue-500">Tasks</button>
+            <button class="tab-btn px-4 py-2 text-gray-500">Reminders</button>
+            <button class="tab-btn px-4 py-2 text-gray-500">Notes</button>
+            <button class="tab-btn px-4 py-2 text-gray-500">Timer</button>
+        </div>
+    <footer class="text-center text-sm text-gray-500 mt-12 pb-4">
+        Developed by Kshitiz | © 2023 All Rights Reserved
+    </footer>
+        <header class="flex flex-col items-center mb-6 animate-fadeIn">
+            <div class="w-24 h-24 mb-4">
+                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/fce3e529-4b66-412a-8538-6dbd30254d74.png" alt="Premium Kshitiz Logo" class="rounded-full border-2 border-white shadow-lg animate-pulse" style="animation-duration: 2s; filter: drop-shadow(0 4px 6px rgba(59, 130, 246, 0.5))" />
+            </div>
+            <h1 class="header-title text-3xl font-bold text-center text-blue-700 mb-2">Kshitiz To-Do</h1>
+            <p class="text-blue-400 text-center">Premium Task Management</p>
+        </header>
+
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden animate-fadeIn" style="animation-delay: 0.2s;">
+            <div class="p-6 border-b border-gray-200">
+                <form id="task-form" class="flex items-center gap-2">
+                    <input 
+                        type="text" 
+                        id="task-input" 
+                        placeholder="Add a new task..." 
+                        class="flex-1 px-4 py-3 rounded-lg border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                    >
+                    <input type="datetime-local" id="reminder-time" class="px-3 py-3 rounded-lg border border-blue-200 mr-2 transition-all hover:shadow-md">
+                    <select 
+                        id="priority-select" 
+                        class="px-3 py-3 rounded-lg border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:border-blue-400 hover:scale-[1.02]"
+                    >
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                    <button 
+                        type="submit" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg transition-colors duration-200 font-medium shadow-md"
+                    >
+                        Add
+                    </button>
+                </form>
+            </div>
+
+            <div class="overflow-y-auto" style="max-height: 50vh;">
+                <ul id="task-list" class="divide-y divide-gray-200">
+                    <!-- Tasks will be added here dynamically -->
+                </ul>
+
+                <div id="empty-state" class="no-tasks py-12 px-6">
+                    <div class="w-24 h-24 mb-4">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/f1d0e41c-8495-4928-b9b2-6da8a5c03c32.png" alt="Empty Tasks" class="opacity-90 hover:opacity-100 transition-opacity duration-500" />
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Nothing to do!</h3>
+                    <p class="text-gray-500 text-center">Add a task above to get started</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 animate-fadeIn" style="animation-delay: 0.4s;">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-lg font-medium text-gray-800">Progress</h3>
+                <span id="progress-count" class="text-sm font-medium text-blue-600">0% complete</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div id="progress-bar" class="bg-gradient-to-r from-blue-400 to-blue-600 h-3 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+            </div>
+        </div>
+        
+        <div id="notes-container" class="mt-8 hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="note bg-yellow-100 p-4 rounded-lg shadow">
+                <textarea class="w-full bg-transparent" placeholder="Write your note here..."></textarea>
+                <button class="delete-note mt-2 text-red-500">×</button>
+            </div>
+        </div>
+
+        <div id="timer-container" class="mt-8 hidden text-center">
+            <div class="text-4xl font-mono mb-4 animate-pulse" id="timer-display">25:00</div>
+            <div class="flex justify-center gap-4 mb-4">
+                <select id="timer-preset" class="px-3 py-2 border rounded">
+                    <option value="1500">Pomodoro (25:00)</option>
+                    <option value="300">Short Break (05:00)</option>
+                    <option value="900">Long Break (15:00)</option>
+                    <option value="custom">Custom</option>
+                </select>
+                <input type="number" id="custom-time" class="w-16 px-2 border rounded hidden" placeholder="Seconds">
+            </div>
+            <button class="start-timer bg-blue-600 text-white px-4 py-2 rounded">Start Timer</button>
+        </div>
+    </div>
+
+    <button id="clear-all-btn" class="floating-btn bg-red-500 hover:bg-red-600 text-white hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+    </button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const taskForm = document.getElementById('task-form');
+            const taskInput = document.getElementById('task-input');
+            const prioritySelect = document.getElementById('priority-select');
+            const taskList = document.getElementById('task-list');
+            const emptyState = document.getElementById('empty-state');
+            const progressCount = document.getElementById('progress-count');
+            const progressBar = document.getElementById('progress-bar');
+            const clearAllBtn = document.getElementById('clear-all-btn');
+
+            /* Kshitiz's Custom Task Manager 
+               Features:
+               - Priority-based task sorting
+               - Local storage persistence
+               - Animated UI elements
+            */
+            const ksTasks = JSON.parse(localStorage.getItem('ksTasks')) || []; // Using custom storage key
+            
+            // Render tasks
+            renderTasks();
+            updateProgress();
+            updateClearAllButton();
+            
+            // Handle tab switching
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'border-blue-500', 'text-blue-600'));
+                    this.classList.add('active', 'border-blue-500', 'text-blue-600');
+                    // Handle tab content visibility
+                });
+            });
+            
+            // Timer functionality
+            let timerInterval;
+            document.querySelector('.start-timer').addEventListener('click', function() {
+                if (timerInterval) clearInterval(timerInterval);
+                let seconds = 25 * 60;
+                
+                timerInterval = setInterval(() => {
+                    seconds--;
+                    const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+                    const secs = (seconds % 60).toString().padStart(2, '0');
+                    document.querySelector('#timer-container div').textContent = `${mins}:${secs}`;
+                    
+                    if (seconds <= 0) {
+                        clearInterval(timerInterval);
+                        alert("Time's up!");
+                    }
+                }, 1000);
+            });
+
+            // Add new task
+            taskForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const taskText = taskInput.value.trim();
+                const priority = prioritySelect.value;
+                
+                if (taskText) {
+                    const newTask = {
+                        id: Date.now(),
+                        text: taskText,
+                        completed: false,
+                        priority: priority,
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    tasks.push(newTask);
+                    saveTasks();
+                    renderTasks();
+                    updateProgress();
+                    updateClearAllButton();
+                    
+                    taskInput.value = '';
+                    taskInput.focus();
+                }
+            });
+
+            // Render all tasks
+            function ksRenderTasks() {
+                taskList.innerHTML = '';
+                
+                if (tasks.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+                
+                emptyState.classList.add('hidden');
+                
+                // Sort tasks: completed at bottom, then by priority
+                tasks.sort((a, b) => {
+                    if (a.completed && !b.completed) return 1;
+                    if (!a.completed && b.completed) return -1;
+                    
+                    const priorityOrder = { high: 3, medium: 2, low: 1 };
+                    return priorityOrder[b.priority] - priorityOrder[a.priority];
+                });
+                
+                tasks.forEach(task => {
+                    const taskItem = document.createElement('li');
+                    taskItem.className = `task-item px-6 py-4 flex items-center justify-between bg-white hover:bg-gray-50 ${task.priority}-priority`;
+                    if (task.completed) {
+                        taskItem.classList.add('completed', 'opacity-80');
+                    }
+                    
+                    taskItem.dataset.id = task.id;
+                    
+                    taskItem.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            <button class="complete-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ${task.completed ? 'text-green-500' : 'text-gray-300'}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </button>
+                            <div>
+                                <p class="text-gray-800 ${task.completed ? 'line-through' : ''}">${task.text}</p>
+                                <div class="flex items-center mt-1 space-x-2 text-xs text-gray-500">
+                                    <span class="px-2 py-0.5 rounded-full ${getPriorityBadgeClass(task.priority)}">${task.priority}</span>
+                                    <span>${formatDate(task.createdAt)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="delete-btn text-gray-400 hover:text-red-500 transition-colors duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    `;
+                    
+                    taskList.appendChild(taskItem);
+                });
+                
+                // Add event listeners to the dynamically created buttons
+                document.querySelectorAll('.complete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const taskId = parseInt(this.closest('li').dataset.id);
+                        toggleTaskComplete(taskId);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const taskId = parseInt(this.closest('li').dataset.id);
+                        deleteTask(taskId);
+                    });
+                });
+            }
+            
+            function getPriorityBadgeClass(priority) {
+                switch(priority) {
+                    case 'high': return 'bg-red-100 text-red-800';
+                    case 'medium': return 'bg-yellow-100 text-yellow-800';
+                    case 'low': return 'bg-green-100 text-green-800';
+                    default: return 'bg-gray-100 text-gray-800';
+                }
+            }
+            
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }
+            
+            function toggleTaskComplete(taskId) {
+                tasks = tasks.map(task => {
+                    if (task.id === taskId) {
+                        return { ...task, completed: !task.completed };
+                    }
+                    return task;
+                });
+                
+                saveTasks();
+                renderTasks();
+                updateProgress();
+            }
+            
+            function deleteTask(taskId) {
+                tasks = tasks.filter(task => task.id !== taskId);
+                saveTasks();
+                renderTasks();
+                updateProgress();
+                updateClearAllButton();
+            }
+            
+            function saveTasks() {
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+            
+            function updateProgress() {
+                if (tasks.length === 0) {
+                    progressCount.textContent = '0% complete';
+                    progressBar.style.width = '0%';
+                    return;
+                }
+                
+                const completedCount = tasks.filter(task => task.completed).length;
+                const percentage = Math.round((completedCount / tasks.length) * 100);
+                
+                progressCount.textContent = `${percentage}% complete`;
+                progressBar.style.width = `${percentage}%`;
+            }
+            
+            function checkReminders() {
+                const now = new Date().getTime();
+                tasks.forEach(task => {
+                    if (task.reminder && new Date(task.reminder).getTime() <= now && !task.notified) {
+                        alert(`Reminder: ${task.text}`);
+                        task.notified = true;
+                        saveTasks();
+                    }
+                });
+            }
+            
+            // Tab switching function
+            function switchTab(tabName) {
+                document.querySelectorAll('[id$="-tab"]').forEach(tab => tab.classList.remove('active', 'border-blue-500', 'text-blue-600'));
+                document.getElementById(`${tabName}-tab`).classList.add('active', 'border-blue-500', 'text-blue-600');
+                
+                document.getElementById('task-list-container').classList.add('hidden');
+                document.getElementById('notes-container').classList.add('hidden');
+                document.getElementById('timer-container').classList.add('hidden');
+                
+                document.getElementById(`${tabName}-container`).classList.remove('hidden');
+            }
+            
+            // Notes functionality
+            function addNote() {
+                const notesContainer = document.getElementById('notes-container');
+                const noteDiv = document.createElement('div');
+                noteDiv.className = 'note bg-yellow-100 p-4 rounded-lg shadow animate-fadeIn';
+                noteDiv.innerHTML = `
+                    <textarea class="w-full bg-transparent mb-2" placeholder="Write your note here..."></textarea>
+                    <div class="flex justify-end">
+                        <button class="delete-note text-red-500 hover:text-red-700" onclick="this.parentNode.parentNode.remove()">×</button>
+                    </div>
+                `;
+                notesContainer.appendChild(noteDiv);
+            }
+
+            function updateClearAllButton() {
+                if (tasks.length > 0) {
+                    clearAllBtn.classList.remove('hidden');
+                    
+                    clearAllBtn.onclick = function() {
+                        if (confirm('Are you sure you want to delete all tasks?')) {
+                            tasks = [];
+                            saveTasks();
+                            renderTasks();
+                            updateProgress();
+                            clearAllBtn.classList.add('hidden');
+                        }
+                    };
+                } else {
+                    clearAllBtn.classList.add('hidden');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
